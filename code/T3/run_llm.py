@@ -1,7 +1,4 @@
-import os
-import re
 import copy
-import json
 import torch
 import logging
 import pandas as pd
@@ -9,52 +6,17 @@ from math import ceil
 from tqdm import tqdm
 from datetime import date
 from transformers import pipeline
+from logger import get_logger
+from utils import ensure_file, extract_json, build_prompt
 
-# Logging
-logging.basicConfig(
-    filename="logs/gptoss.txt",
-    filemode="w",
-    format="%(asctime)s %(levelname)s: %(message)s",
-    level=logging.INFO,
-)
-logger = logging.getLogger(__name__)
-
-# Output file
-output_file = f"data/video_classification_results.csv"
-if not os.path.exists(output_file):
-    pd.DataFrame(columns=["id", "result"]).to_csv(output_file, index=False)
-
+logger = get_logger()
+file_path = ensure_file("data/classification_results.csv", columns=["id", "result"])
 
 # Config
 MODEL_ID = "openai/gpt-oss-20b"
 BATCH_SIZE = 6
 MAX_NEW_TOKENS = 128
 BATCH_PROMPTS = 12
-
-# JSON extractor
-def extract_json(text):
-    match = re.search(r"\{[\s\S]*?\}", text)
-    if not match:
-        return None
-    try:
-        return json.loads(match.group())
-    except json.JSONDecodeError:
-        return None
-
-
-# Chat → text
-def build_prompt(messages):
-    """
-    Convert chat messages to plain text prompt.
-    Required for gpt-oss models.
-    """
-    text = ""
-    for msg in messages:
-        role = msg["role"].upper()
-        text += f"{role}:\n{msg['content']}\n\n"
-    text += "ASSISTANT:\n"
-    return text
-
 
 # Main
 def main():
