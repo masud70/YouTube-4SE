@@ -34,6 +34,11 @@ def load_existing_ids(path, column='id'):
 
     return existing_ids
 
+def extract_label(text):
+    match = re.search(r'\b(True|False)\b', text.strip())
+    if match:
+        return match.group(1)
+    return "INVALID"  # fallback if model misbehaves
 
 def get_instruction():
     instruction = [
