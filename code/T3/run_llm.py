@@ -1,25 +1,40 @@
-import copy
 import torch
-import logging
 import pandas as pd
 from math import ceil
 from tqdm import tqdm
-from datetime import date
 from transformers import pipeline
 from logger import get_logger
-from utils import ensure_file, extract_json, build_prompt
-
-logger = get_logger()
-file_path = ensure_file("data/classification_results.csv", columns=["id", "result"])
+from prompts import prepare_prompts
+from utils import ensure_file, load_existing_ids, get_instruction
 
 # Config
 MODEL_ID = "openai/gpt-oss-20b"
 BATCH_SIZE = 6
-MAX_NEW_TOKENS = 128
+MAX_NEW_TOKENS = 64
 BATCH_PROMPTS = 12
 
 # Main
 def main():
+    logger = get_logger()
+    file_path = ensure_file("data/classification_results.csv", columns=["id", "result"])
+    existing_ids = load_existing_ids(file_path)
+    instruction = get_instruction()
+    df = pd.read_csv("data/video_metadata.csv", engine="python")
+    prompts = prepare_prompts(df, existing_ids, instruction)
+
+    logger.info("Torch version: %s", torch.__version__)
+    logger.info("Using model: %s", MODEL_ID)
+    logger.info(
+        "CUDA available: %s | GPUs: %s",
+        torch.cuda.is_available(),
+        torch.cuda.device_count(),
+    )
+
+    print(f"Total videos     : {len(df)}")
+    print(f"Processing videos: {len(prompts)}")
+    if not prompts:
+        return
+
     pipe = pipeline(
         "text-generation",
         model=MODEL_ID,
@@ -27,53 +42,7 @@ def main():
         device_map="auto",
         return_full_text=False,
     )
-
-    logging.info("Torch version: %s", torch.__version__)
-    logging.info(
-        "CUDA available: %s | GPUs: %s",
-        torch.cuda.is_available(),
-        torch.cuda.device_count(),
-    )
-
-    # Load processed IDs
-    try:
-        existing_ids = set(pd.read_csv(output_file)["id"].astype(str))
-    except Exception:
-        existing_ids = set()
-
-    print(f"Already processed {len(existing_ids)} videos.")
-
-    # YOUR COMMANDS (unchanged)
-    commands = []
-
-    # Load metadata
-    df = pd.read_csv("data/video_metadata.csv", engine="python")
-
-    prompts = []
-
-    for _, row in df.iterrows():
-        vid = str(row["id"])
-        if vid in existing_ids:
-            continue
-
-        p = build_prompt(
-                copy.deepcopy(commands) + [{
-                    "role": "user",
-                    "content": (
-                        f"id: {row['id']}, "
-                        f"title: {row['title']}, "
-                        f"description: {row['description']}"
-                    )
-                }]
-            )
-        prompts.append(p)
-
-    print(f"Total videos     : {len(df)}")
-    print(f"Processing videos: {len(prompts)}")
-
-    if not prompts:
-        return
-
+    
     # Batched inference
     # fix decoder-only padding
     pipe.tokenizer.padding_side = "left"
@@ -92,16 +61,8 @@ def main():
         	batch_size=BATCH_SIZE
     	)
 
-        for out in outputs:
-            text = out[0]["generated_text"]
-            parsed = extract_json(text)
-            if parsed and "id" in parsed and "result" in parsed:
-                results.append(parsed)
-
-        if len(results):
-            df_out = pd.DataFrame(results)
-            df_out.to_csv(output_file, mode="a", header=False, index=False)
-            results = []
+        print(outputs)
+        print(outputs[0]['generated_text'][-1])
 
 # Entry
 if __name__ == "__main__":
