@@ -14,8 +14,8 @@ def main():
     output_file_path = ensure_file("data/classification_results.csv", columns=["id", "result"])
     existing_ids = load_existing_ids(output_file_path)
     instruction = get_instruction()
-    df = pd.read_csv("data/video_metadata.csv", engine="python")
-    videos = prepare_data(df, existing_ids)[:12]
+    df = pd.read_json("data/200_random_videos_2302.json", orient="records")
+    videos = prepare_data(df, existing_ids)
 
     logger.info("Torch version: %s", torch.__version__)
     logger.info("Using model: %s", CONFIG.MODEL_ID)

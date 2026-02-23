@@ -46,33 +46,19 @@ def get_instruction():
             "role": "SYSTEM",
             "content": """You are a strict binary classifier for Software Engineering educational content.
 
-                        Definition:
-                        This study considers YouTube videos that contribute to Software Engineering (SE) education worldwide, focusing on content that supports the systematic and disciplined development, operation, and maintenance of software systems. In this work, Software Engineering includes the core phases of the Software Development Life Cycle (SDLC), such as requirements engineering, system design, implementation, testing, deployment, and maintenance, as well as related technical and managerial practices. The scope covers programming concepts when presented in the context of software construction, code quality, design patterns, version control, debugging, refactoring, software architecture, DevOps practices, project management, documentation, and quality assurance. Research-oriented topics—such as empirical software engineering, software metrics, AI for software engineering, software engineering for AI, and software security—are included when directly connected to improving software development processes or systems. Recognizing software as a product, the definition also includes content on product management, release strategies, and SaaS models when clearly tied to the software lifecycle. Excluded are videos focused solely on hardware engineering, purely theoretical topics unrelated to software systems, general technology news without educational depth, isolated coding exercises without engineering context, or business discussions not explicitly connected to software development.
+                    Definition of Software Engineering educational content:
+                    Software Engineering YouTube videos that contribute to Software Engineering (SE) education worldwide, grounded in the knowledge areas defined by the SWEBOK Guide V4.0a. Software Engineering is defined as the systematic, disciplined, and measurable approach to the specification, design, construction, testing, deployment, operation, maintenance, management, and evolution of software systems. The scope includes content aligned with SWEBOK knowledge areas such as Software Requirements, Architecture, Design, Construction, Testing, Maintenance, Configuration Management, Engineering Operations (including DevOps and release engineering), Software Engineering Management, Process, Models and Methods, Software Quality, Software Security, Professional Practice, and Software Engineering Economics. It also includes research-oriented topics—such as empirical software engineering, software metrics, AI for software engineering, secure development life cycles, and process improvement—when they directly relate to improving software systems or engineering practices. Foundational topics from Computing, Mathematical, and Engineering Foundations are included only when presented in support of software engineering activities (e.g., algorithms for software performance, AI in SE, networking for distributed systems). Content related to software product strategy, release planning, SaaS engineering models, and economic decision-making is included when explicitly tied to the software lifecycle. Excluded are videos focused solely on hardware engineering, general computer science theory without connection to software engineering practice, pure programming syntax tutorials without engineering context, general technology news, or business topics unrelated to software system development and management.
 
-                        Task:
-                        Given the TITLE and DESCRIPTION of a YouTube video, determine whether the video is related to Software Engineering education.
+                    Task:
+                    Given the TITLE and DESCRIPTION of a YouTube video, determine whether the video is related to Software Engineering education.
 
-                        Include videos that teach or explain methods, practices, tools, research, or strategies related to building, managing, or evolving software systems.
+                    Input:
+                    TITLE: {title}
+                    DESCRIPTION: {description}
 
-                        Exclude videos focused only on:
-                        - Pure programming syntax without engineering context
-                        - Hardware engineering
-                        - General technology news
-                        - Pure mathematics unrelated to software systems
-                        - Business topics not directly tied to software development
-                        - Entertainment content unrelated to software engineering
-
-                        Output rules:
-                        Respond with ONLY one word: True or False
-                        True  -> if related.
-                        False -> if not related.
-                        Do NOT explain your answer.
-                        Do NOT output anything else.
-                        Do NOT add punctuation.
-                        Do NOT add additional words.
-
-                        TITLE: {title}
-                        DESCRIPTION: {description}
+                    Output rules:
+                    - Respond with ONLY one word: True if related or False if not related.
+                    - Do NOT explain, output anything else, add punctuation, or add additional words with your answer.
                     """
         }
     ]
