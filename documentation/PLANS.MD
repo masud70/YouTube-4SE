@@ -14,3 +14,4 @@
 ## Continuous Tasks
 
 - <input type="checkbox" checked> Data collection
+- <input type="checkbox"> Update the keyword collection according to the SWEBOK
