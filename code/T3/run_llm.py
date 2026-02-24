@@ -14,7 +14,7 @@ def main():
     output_file_path = ensure_file("data/classification_results.csv", columns=["id", "result"])
     existing_ids = load_existing_ids(output_file_path)
     instruction = get_instruction()
-    df = pd.read_json("data/200_random_videos_2302.json", orient="records")
+    df = pd.read_json("input/200_random_videos_2302.json", orient="records")
     videos = prepare_data(df, existing_ids)
 
     logger.info("Torch version: %s", torch.__version__)
@@ -52,7 +52,9 @@ def main():
         batch_prompts = prepare_prompts(videos[start:end], instruction)
         outputs = pipe(
         	batch_prompts,
-        	batch_size=CONFIG.BATCH_SIZE
+        	batch_size=CONFIG.BATCH_SIZE,
+            max_new_tokens=CONFIG.MAX_NEW_TOKENS,
+            do_sample=False,
     	)
 
         for idx, out in enumerate(outputs):
@@ -61,6 +63,8 @@ def main():
                 continue
             else:
                 label = extract_label(result[-1])
+                if label == "INVALID":
+                    continue
                 with open(output_file_path, "a") as file:
                     file.write(f"{videos[start+idx]['id']},{label}\n")
 

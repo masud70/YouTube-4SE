@@ -9,3 +9,4 @@ class CONFIG:
     BATCH_SIZE = 6
     MAX_NEW_TOKENS = 64
     BATCH_PROMPTS = 12
+    NUM_EXAMPLES = 0
