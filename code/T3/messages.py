@@ -47,7 +47,6 @@ examples = [
 ]
 
 def get_messages(count: int = 0) -> list[dict[str, str]]:
-    return [
-        instructions,
-        *examples[:count]
-    ]
+    messages = [instructions]
+    messages.extend(ex for example in examples[:count] for ex in example)
+    return messages
