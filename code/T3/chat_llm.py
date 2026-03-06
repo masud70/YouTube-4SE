@@ -1,3 +1,8 @@
+import os
+os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "expandable_segments:True"
+os.environ["TORCH_SDPA_ENABLE_FLASH"] = "1"
+os.environ["TORCH_SDPA_ENABLE_MEM_EFFICIENT"] = "1"
+os.environ["TORCH_SDPA_ENABLE_MATH"] = "0"
 import torch
 import pandas as pd
 from math import ceil
@@ -7,14 +12,14 @@ from logger import get_logger
 from prompts import prepare_data
 from messages import get_messages
 from transformers import AutoTokenizer, AutoModelForCausalLM
-from utils import ensure_file, load_existing_ids, extract_label
+from utils import ensure_file, load_existing_ids, extract_label_1
 
 # Main
 def main():
     logger = get_logger()
-    output_file_path = ensure_file("data/classification_results.csv", columns=["id", "result"])
+    output_file_path = ensure_file("data/result_videos_260226.csv", columns=["id", "result"])
     existing_ids = load_existing_ids(output_file_path)
-    df = pd.read_json("input/200_random_videos_2302.json", orient="records")
+    df = pd.read_json("input/videos_260226.json", orient="records")
     videos = prepare_data(df, existing_ids)
 
     logger.info("Torch version: %s", torch.__version__)
@@ -35,6 +40,7 @@ def main():
         CONFIG.MODEL_ID,
         torch_dtype=CONFIG.DTYPE,
         device_map=CONFIG.DEVICE_MAP,
+        # attn_implementation="sdpa"
     )
 
     tokenizer.padding_side = "left"
@@ -64,7 +70,6 @@ def main():
                 tokenize=False,
                 add_generation_prompt=True
             )
-
             inputs.append(prompt)
 
         model_inputs = tokenizer(
@@ -77,7 +82,8 @@ def main():
         outputs = model.generate(
             **model_inputs,
             max_new_tokens=CONFIG.MAX_NEW_TOKENS,
-            do_sample=False
+            do_sample=False,
+            use_cache=True
         )
 
         generated_tokens = outputs[:, model_inputs["input_ids"].shape[1]:]
@@ -88,7 +94,7 @@ def main():
         )
 
         for idx, text in enumerate(decoded):
-            label = extract_label(text)
+            label = extract_label_1(text)
             if label == "INVALID":
                 continue
 

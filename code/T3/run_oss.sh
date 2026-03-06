@@ -7,8 +7,8 @@
 
 #SBATCH --time=06:00:00
 #SBATCH --gres=gpu:h100:2
-#SBATCH --cpus-per-task=4
-#SBATCH --mem=20G
+#SBATCH --cpus-per-task=2
+#SBATCH --mem=40G
 
 set -euo pipefail
 echo "Job started on $(hostname) at $(date)"
